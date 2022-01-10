@@ -7,14 +7,14 @@ import (
 )
 
 func main() {
-	doc, err := goquery.NewDocument("https://github.com/PuerkitoBio/goquery")
+	doc, err := goquery.NewDocument("https://kcia.or.kr/cid/search/ingd_list.php?page=1")
 	if err != nil {
 		fmt.Print("url scarappting faild")
 	}
 
-	doc.Find("table > tbody > tr > td.content > span > a").Each(
-		func(_ int, s *goquery.Selection) {
-			url, _ := s.Attr("href")
-			fmt.Println(url)
-		})
+	doc.Find("tbody > tr").Each(func(_ int, s *goquery.Selection) {
+		fmt.Println("-------")
+		fmt.Println(s.Text())
+		fmt.Println("-------")
+	})
 }
