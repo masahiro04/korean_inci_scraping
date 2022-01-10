@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/gocarina/gocsv"
 )
 
 type Row struct {
@@ -12,16 +14,17 @@ type Row struct {
 	Inci string `csv:"INCI"`
 }
 
-func NewRow(id string, name string, inci string) *Row {
-	return &Row{
-		ID:   id,
-		Name: name,
-		Inci: inci,
-	}
-}
+// func NewRow(id string, name string, inci string) *Row {
+// 	return &Row{
+// 		ID:   id,
+// 		Name: name,
+// 		Inci: inci,
+// 	}
+// }
 
 func (row *Row) isValid() bool {
-	if &row.Name != nil || &row.Inci != nil {
+	// NOTE(okubo): ルール決めておくべきかも
+	if &row.Name == nil || &row.Inci == nil {
 		return false
 	}
 
@@ -29,9 +32,11 @@ func (row *Row) isValid() bool {
 }
 
 func main() {
-	// var headings []string
-	row := &Row{ID: "", Name: "", Inci: ""}
-	var rows []*Row
+	row := &Row{}
+	rows := []*Row{}
+
+	file, _ := os.OpenFile("koreandata.csv", os.O_RDWR|os.O_CREATE, os.ModePerm)
+	defer file.Close()
 
 	doc, err := goquery.NewDocument("https://kcia.or.kr/cid/search/ingd_list.php?page=1")
 	if err != nil {
@@ -51,17 +56,16 @@ func main() {
 				}
 				// row = append(row, cell.Text())
 			})
-			fmt.Println(row)
 
 			if row.isValid() {
 				fmt.Println(row)
 				rows = append(rows, row)
 			}
-			// row = NewRow{id: "", name: "", inci: ""}
 			row = &Row{ID: "", Name: "", Inci: ""}
 
 		})
 	})
 
+	gocsv.MarshalFile(&rows, file)
 	fmt.Println(&rows)
 }
